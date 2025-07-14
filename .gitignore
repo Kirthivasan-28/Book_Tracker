@@ -1,0 +1,34 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.so
+
+# Virtual environment
+venv/
+.env
+.env.*
+
+# VSCode settings (optional)
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test results
+coverage/
+*.cover
+*.py,cover
+htmlcov/
+
+# Database logs or dumps
+*.sqlite3
+*.log
+
+# Mongo URI backup (if any)
+*.bson
+*.json
+
+
+venv/
+.venv/
