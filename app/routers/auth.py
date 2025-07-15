@@ -1,7 +1,7 @@
 from fastapi import APIRouter, status, HTTPException
-from database import db
-from schemas.user import UserSignup
-from auth.jwt_handler import hashPassword
+from app.database import db
+from app.schemas.user import UserSignup, UserLogin
+from app.auth.jwt_handler import hashPassword, verifyPassword, create_access_token
 from datetime import datetime, timezone
 router = APIRouter()
 
@@ -22,4 +22,23 @@ async def user_signup(usersignup: UserSignup):
         }
     except Exception as e:
         raise HTTPException(status_code=500,detail="Database error while creating new entry")
-    
+
+
+
+@router.post("/login", status_code=status.HTTP_200_OK)
+async def user_login(userlogin: UserLogin):
+    user_login = userlogin.model_dump()
+    try:
+        user_check = await db.user.find_one({"email":user_login["email"]})
+        if not user_check:
+            raise HTTPException(status_code = 401, detail = "Invalid email")
+        if not verifyPassword(user_login["password"], user_check["password"]):
+            raise HTTPException(status_code = 401, detail = "Invalid password")
+        
+        token = create_access_token({"sub":user_check["email"]})
+        return {
+            "access_token": token,
+            "token_type":"bearer"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail = "Database error while fetching the user details!")
