@@ -15,13 +15,19 @@ async def user_signup(usersignup: UserSignup):
         if existing_user:
             raise HTTPException(status_code=400, detail="Email already registered!")
         result = await db.user.insert_one(create_user)
-        result["id"] = str(result.inserted_id)
+        inserted_id = str(result.inserted_id)
         return {
             "message":"User created Successfully!!",
-            "email":create_user["email"]
+            "email":create_user["email"],
+            "id":inserted_id
         }
-    except Exception as e:
+    except HTTPException:
+        raise
+    except (ConnectionError, TimeoutError) as e:
         raise HTTPException(status_code=500,detail="Database error while creating new entry")
+    except Exception as e:
+        print(f"Unexpected Error:{e}")
+        raise HTTPException(status_code=500, detail="An unexpected error occurred")
 
 
 
@@ -40,5 +46,8 @@ async def user_login(userlogin: UserLogin):
             "access_token": token,
             "token_type":"bearer"
         }
+    except HTTPException:
+        raise 
     except Exception as e:
+        print(f"Database error while login:{e}")
         raise HTTPException(status_code=500, detail = "Database error while fetching the user details!")
